@@ -3,21 +3,19 @@ import random
 from deuces import Card, Evaluator, Deck
 from itertools import product
 
-# --- Configuration de la Page (Doit être la 1ère commande Streamlit) ---
+# --- Configuration de la Page ---
 st.set_page_config(
-    page_title="BarnaPoker",  # Titre de l'onglet du navigateur
-    page_icon="🃏",          # Icône de l'onglet (emoji)
-    layout="centered"         # Mettre le contenu au centre
+    page_title="BarnaPoker",
+    page_icon="🃏",
+    layout="centered"
 )
 
 # --- Configuration de la Simulation ---
 NB_ADVERSAIRES = 1
 NB_SIMULATIONS = 10000
-
-# Initialise l'évaluateur de main
 evaluator = Evaluator()
 
-# --- Dictionnaires de Traduction (Inchangés) ---
+# --- Dictionnaires de Traduction ---
 VALEURS_TRADUCTION = {
     '2': '2', '3': '3', '4': '4', '5': '5', '6': '6', '7': '7', '8': '8', '9': '9',
     'dix': 'T', 't': 'T', 'valet': 'J', 'v': 'J', 'dame': 'Q', 'd': 'Q', 'roi': 'K', 'r': 'K', 'as': 'A', 'a': 'A'
@@ -27,7 +25,7 @@ COULEURS_TRADUCTION = {
 }
 ABREVIATIONS_COULEURS = {'h': 'Cœur', 'd': 'Carreau', 'c': 'Trèfle', 's': 'Pique'}
 
-# --- Listes de Cartes (Inchangées) ---
+# --- Génération des listes de cartes ---
 VALEURS = ['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A']
 COULEURS = ['h', 'd', 'c', 's']
 CARTES_ABREGEES = sorted([v + c for v, c in product(VALEURS, COULEURS)])
@@ -39,6 +37,9 @@ for abr in CARTES_ABREGEES:
     valeur_fr = next((k for k, v in VALEURS_TRADUCTION.items() if v == valeur), valeur).capitalize()
     couleur_fr = ABREVIATIONS_COULEURS[couleur_abr]
     CARTES_DISPONIBLES_FR.append(f"{valeur_fr} {couleur_fr}")
+
+# Option "Vide" pour les sélecteurs du board
+VIDE = "---"
 
 # --- Fonctions de Logique (Inchangées) ---
 
@@ -120,13 +121,13 @@ def get_conseil_et_analyse(equite, taille_pot, mise_a_payer):
 def lancer_app():
     """Fonction principale de l'application Streamlit."""
     
-    # --- NOUVEAU : Initialisation de la Mémoire de Session (Stats) ---
+    # --- Initialisation de la Mémoire de Session (Stats) ---
     if 'wins' not in st.session_state:
         st.session_state.wins = 0
     if 'losses' not in st.session_state:
         st.session_state.losses = 0
 
-    # --- NOUVEAU : Fonctions de Callback pour les boutons Stats ---
+    # --- Fonctions de Callback pour les boutons Stats ---
     def increment_wins():
         st.session_state.wins += 1
         
@@ -145,7 +146,7 @@ def lancer_app():
         
     st.markdown("---")
 
-    # --- NOUVEAU : Affichage des Statistiques de Session ---
+    # --- Affichage des Statistiques de Session ---
     st.header("📊 Statistiques de Session")
     stat_cols = st.columns(2)
     stat_cols[0].metric("Mains Gagnées", st.session_state.wins, "🟢")
@@ -157,21 +158,40 @@ def lancer_app():
     
     col1, col2 = st.columns(2)
     carte1_fr = col1.selectbox("Carte 1 :", options=CARTES_DISPONIBLES_FR, key='c1')
+    
+    # On filtre les options pour ne pas sélectionner deux fois la même carte
     options_c2 = [c for c in CARTES_DISPONIBLES_FR if c != carte1_fr]
     carte2_fr = col2.selectbox("Carte 2 :", options=options_c2, key='c2')
 
-    # 2. Saisie des cartes communes (Board)
+    # Cartes déjà sélectionnées (Main)
+    cartes_selectionnees = [carte1_fr, carte2_fr]
+
+    # --- NOUVEAU : Saisie du Board avec des Sélecteurs ---
     st.header("2. Cartes Communes (Board)")
-    st.info("Remplissez les 3 cases du Flop. La 4ème (Turn) et 5ème (River) sont optionnelles.")
+    st.info("Sélectionnez les 3 cartes du Flop. La 4ème (Turn) et 5ème (River) sont optionnelles.")
+
+    # Options de base pour le board (tout sauf la main du joueur)
+    options_board_base = [VIDE] + [c for c in CARTES_DISPONIBLES_FR if c not in cartes_selectionnees]
     
     flop_cols = st.columns(3)
-    flop1 = flop_cols[0].text_input("Flop 1", placeholder="Ex: As Pique")
-    flop2 = flop_cols[1].text_input("Flop 2", placeholder="Ex: Roi Coeur")
-    flop3 = flop_cols[2].text_input("Flop 3", placeholder="Ex: 7 Trefle")
+    flop1 = flop_cols[0].selectbox("Flop 1", options=options_board_base, key='f1')
+    
+    # Filtrer Flop 2 (ne peut pas être f1 ou la main)
+    options_f2 = [c for c in options_board_base if c != flop1]
+    flop2 = flop_cols[1].selectbox("Flop 2", options=options_f2, key='f2')
+    
+    # Filtrer Flop 3 (ne peut pas être f1, f2 ou la main)
+    options_f3 = [c for c in options_board_base if c not in [flop1, flop2]]
+    flop3 = flop_cols[2].selectbox("Flop 3", options=options_f3, key='f3')
     
     tr_cols = st.columns(2)
-    turn = tr_cols[0].text_input("Turn (4ème carte)", placeholder="Optionnel")
-    river = tr_cols[1].text_input("River (5ème carte)", placeholder="Optionnel")
+    # Filtrer Turn
+    options_turn = [c for c in options_board_base if c not in [flop1, flop2, flop3]]
+    turn = tr_cols[0].selectbox("Turn (4ème carte)", options=options_turn, key='t')
+    
+    # Filtrer River
+    options_river = [c for c in options_board_base if c not in [flop1, flop2, flop3, turn]]
+    river = tr_cols[1].selectbox("River (5ème carte)", options=options_river, key='r')
 
     # 3. Saisie des variables financières
     st.header("3. Variables de Jeu")
@@ -188,27 +208,24 @@ def lancer_app():
         try:
             main_joueur = [parse_card(carte1_fr), parse_card(carte2_fr)]
             
-            # Conversion de la saisie du board (depuis les 5 cases)
+            # Conversion de la saisie du board (depuis les 5 sélecteurs)
             board_list_str = [flop1, flop2, flop3, turn, river]
-            board_list_fr = [c.strip() for c in board_list_str if c.strip()]
+            # On ne garde que les cartes valides (pas "---")
+            board_list_fr = [c for c in board_list_str if c != VIDE]
             
             cartes_communes = []
             if len(board_list_fr) > 0:
                 cartes_communes = [parse_card(c) for c in board_list_fr]
             else:
-                st.warning("Veuillez entrer au moins 3 cartes communes (Flop) pour un calcul utile.")
+                st.warning("Veuillez sélectionner au moins 3 cartes communes (Flop) pour un calcul utile.")
                 return
 
             if len(cartes_communes) < 3:
                 st.error("Le Flop doit contenir 3 cartes pour un calcul.")
                 return
             
-            toutes_cartes = main_joueur + cartes_communes
-            toutes_cartes_ints = [c for c in toutes_cartes] 
-            if len(toutes_cartes_ints) != len(set(toutes_cartes_ints)):
-                st.error("Attention : Des cartes sont en double. Veuillez vérifier.")
-                return
-
+            # La vérification des doublons est gérée par les filtres des sélecteurs (plus besoin de la vérification manuelle)
+            
             # --- Affichage des résultats et calcul ---
             
             with st.spinner(f"Simulation de {NB_SIMULATIONS} mains en cours..."):
@@ -232,18 +249,16 @@ def lancer_app():
             st.header("➡️ CONSEIL DU BOT :")
             st.markdown(f"## {conseil}")
             
-            # --- NOUVEAU : Boutons GAGNER / PERDU ---
+            # --- Boutons GAGNER / PERDU ---
             st.markdown("---")
             st.subheader("Enregistrer le résultat de cette main :")
             stat_btn_cols = st.columns(2)
             
-            # Bouton GAGNER (utilise on_click pour appeler la fonction increment_wins)
             stat_btn_cols[0].button(
                 "🟢 GAGNER (Main suivante)", 
                 on_click=increment_wins, 
                 use_container_width=True
             )
-            # Bouton PERDU
             stat_btn_cols[1].button(
                 "🔴 PERDU (Main suivante)", 
                 on_click=increment_losses, 
