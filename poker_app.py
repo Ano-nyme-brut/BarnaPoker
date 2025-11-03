@@ -10,10 +10,9 @@ st.set_page_config(page_title="BarnaPoker", page_icon="🃏", layout="centered")
 # -------------------------------------------------------------------
 # ⚠️ ACTION REQUISE : Mettez à jour ces deux lignes ! ⚠️
 VOTRE_NOM_UTILISATEUR_GITHUB = "Ano-nyme-brut"
-VOTRE_NOM_DEPO_GITHUB = "BarnaPoker" # C'EST VOTRE VARIABLE DE DÉPÔT ORIGINALE
+VOTRE_NOM_DEPO_GITHUB = "BarnaPoker" 
 # -------------------------------------------------------------------
 
-# Nous utilisons la variable d'origine (VOTRE_NOM_DEPO_GITHUB) pour les calculs.
 BASE_IMAGE_URL = f"https://raw.githubusercontent.com/{VOTRE_NOM_UTILISATEUR_GITHUB}/{VOTRE_NOM_DEPO_GITHUB}/main/images/"
 
 # --- Configuration de la Simulation ---
@@ -38,7 +37,9 @@ ORDRE_COULEUR = {'s': 4, 'h': 3, 'd': 2, 'c': 1}
 # --- Définitions de Cartes ---
 VALEURS = ['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A']
 COULEURS = ['h', 'd', 'c', 's']
-CARTES_ABREGEES = [v + c for v + c in product(VALEURS, COULEURS)]
+
+# CORRECTION DE LA SYNTAXE (LIGNE 41)
+CARTES_ABREGEES = [v + c for v, c in product(VALEURS, COULEURS)]
 
 
 def get_carte_fr(abr):
@@ -200,7 +201,7 @@ def lancer_app():
     # --- En-tête (Titre et Logo) ---
     col_logo, col_titre = st.columns([1, 3])
     with col_logo:
-        # CORRECTION DE LA FAUTE DE FRAPPE : UTILISE VOTRE_NOM_DEPO_GITHUB
+        # CORRECTION DE LA FAUTE DE FRAPPE ICI
         st.image(f"https://github.com/{VOTRE_NOM_UTILISATEUR_GITHUB}/{VOTRE_NOM_DEPO_GITHUB}/blob/main/barnaPoker.png?raw=true", width=150)
     with col_titre:
         st.title("BarnaPoker 🃏")
@@ -228,7 +229,7 @@ def lancer_app():
     stat_cols[1].metric("Mains Perdues", st.session_state.losses, "🔴")
     stat_cols[2].metric("Taux de Réussite", f"{taux_reussite:.1f}%", "🎯")
     
-    # Bouton de Réinitialisation des stats 
+    # Bouton de Réinitialisation des stats (Appel de la fonction stable)
     if st.button("Réinitialiser les Statistiques", on_click=reset_stats_action_safe, type="default"):
         pass
         
