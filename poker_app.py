@@ -32,7 +32,14 @@ ABREVIATIONS_COULEURS = {'h': 'Cœur', 'd': 'Carreau', 'c': 'Trèfle', 's': 'Piq
 
 ORDRE_VALEUR = {'A': 14, 'K': 13, 'Q': 12, 'J': 11, 'T': 10, '9': 9, '8': 8, '7': 7, '6': 6, '5': 5, '4': 4, '3': 3, '2': 2}
 ORDRE_COULEUR = {'s': 4, 'h': 3, 'd': 2, 'c': 1} 
+
+
+# --- DÉFINITION CORRIGÉE (REMONTÉE EN HAUT) ---
+VALEURS = ['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A']
+COULEURS = ['h', 'd', 'c', 's']
 CARTES_ABREGEES = [v + c for v, c in product(VALEURS, COULEURS)]
+# ---------------------------------------------
+
 
 def get_carte_fr(abr):
     valeur = abr[0]
@@ -58,6 +65,8 @@ def get_button_value(card_fr):
         if key == valeur_fr:
             return short_code
     return valeur_fr.upper()
+
+# --- Fonctions de Logique (Conversion, Calcul, Affichage) ---
 
 def parse_card_to_int(card_str_fr):
     parties = card_str_fr.lower().replace('-', ' ').split()
@@ -100,7 +109,9 @@ def get_equity(main_joueur, cartes_communes, nb_adversaires):
             for i in range(nb_adversaires)
         ]
         score_joueur = evaluator.evaluate(board_final, main_joueur)
+        
         scores_adversaires = [evaluator.evaluate(board_final, adv_main) for adv_main in adversaires_mains]
+        
         meilleur_score_adverse = min(scores_adversaires) if scores_adversaires else float('inf')
         if score_joueur < meilleur_score_adverse: victoires += 1
         elif score_joueur == meilleur_score_adverse: egalites += 1
@@ -143,6 +154,7 @@ def display_selected_cards(card_list: List[str], title: str, cols: int):
                     st.image(BASE_IMAGE_URL + img_file, use_container_width=True) 
                 
                 st.markdown(f"<p style='text-align: center; font-size: 14px; margin-top: -10px;'>{card_fr}</p>", unsafe_allow_html=True) 
+
 
 # --- Logique de Clic des Boutons (Séparée) ---
 
@@ -187,7 +199,7 @@ def lancer_app():
         st.subheader("L'outil essentiel pour devenir un joueur gagnant.")
         
     st.markdown("---")
-    
+
     # --- Section de Bienvenue / Description ---
     st.markdown("""
         ### Bienvenue, Stratège.
