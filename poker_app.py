@@ -9,6 +9,7 @@ st.set_page_config(page_title="BarnaPoker", page_icon="🃏", layout="centered")
 
 # -------------------------------------------------------------------
 # ⚠️ ACTION REQUISE : Mettez à jour ces deux lignes ! ⚠️
+# Remplacez par vos vrais identifiants
 VOTRE_NOM_UTILISATEUR_GITHUB = "Ano-nyme-brut"
 VOTRE_NOM_DEPO_GITHUB = "BarnaPoker" 
 # -------------------------------------------------------------------
@@ -37,9 +38,8 @@ ORDRE_COULEUR = {'s': 4, 'h': 3, 'd': 2, 'c': 1}
 # --- Définitions de Cartes ---
 VALEURS = ['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A']
 COULEURS = ['h', 'd', 'c', 's']
-
-# CORRECTION DE LA SYNTAXE (LIGNE 41 - MAINTENANT LIGNE 40)
-CARTES_ABREGEES = [v + c for v, c in product(VALEURS, COULEURS)]
+# CORRECTION SYNTAXIQUE APPLIQUÉE
+CARTES_ABREGEES = [v + c for v, c in product(VALEURS, COULEURS)] 
 
 
 def get_carte_fr(abr):
