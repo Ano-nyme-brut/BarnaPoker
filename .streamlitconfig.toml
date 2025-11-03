@@ -1,0 +1,8 @@
+# Fichier : .streamlit/config.toml
+[theme]
+# Couleurs minimalistes Noir/Rouge
+primaryColor = "#FF4B4B"        # Rouge poker pour les boutons/accents
+backgroundColor = "#0E1117"     # Noir profond pour l'arrière-plan
+secondaryBackgroundColor = "#1F232B" # Gris foncé pour les cartes/panneaux
+textColor = "#FAFAFA"           # Blanc pur
+font = "sans serif"
