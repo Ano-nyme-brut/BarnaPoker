@@ -173,10 +173,6 @@ def clear_hand():
 def clear_board():
     st.session_state.board_list = []
     
-# CORRECTION DU CALLBACK : La fonction doit être simple pour ne pas violer l'API.
-def reset_stats_action():
-    st.session_state.wins = 0
-    st.session_state.losses = 0
 
 # --- Interface Streamlit ("BarnaPoker") ---
 
@@ -188,13 +184,20 @@ def lancer_app():
     if 'hand_list' not in st.session_state: st.session_state.hand_list = []
     if 'board_list' not in st.session_state: st.session_state.board_list = []
 
-
+    # --- FONCTIONS LOCALES AUX BOUTONS ---
     def increment_wins(): 
         st.session_state.wins += 1
-        st.rerun() # Force le rechargement pour montrer le score mis à jour
+        st.rerun() # Pour mettre à jour les métriques immédiatement
     def increment_losses(): 
         st.session_state.losses += 1
-        st.rerun() # Force le rechargement pour montrer le score mis à jour
+        st.rerun() # Pour mettre à jour les métriques immédiatement
+        
+    # CORRECTION FINALE DU CALLBACK : Utilise st.rerun pour forcer l'affichage de zéro
+    def reset_stats_action():
+        st.session_state.wins = 0
+        st.session_state.losses = 0
+        st.rerun() 
+    # ------------------------------------
     
     # --- En-tête (Titre et Logo) ---
     col_logo, col_titre = st.columns([1, 3])
@@ -226,9 +229,9 @@ def lancer_app():
     stat_cols[1].metric("Mains Perdues", st.session_state.losses, "🔴")
     stat_cols[2].metric("Taux de Réussite", f"{taux_reussite:.1f}%", "🎯")
     
-    # Bouton de Réinitialisation des stats (Utilise on_click pour l'action)
+    # Bouton de Réinitialisation des stats (Appelle le callback local)
     if st.button("Réinitialiser les Statistiques", on_click=reset_stats_action, type="default"):
-        pass # L'action est gérée par le callback simple, qui est maintenant correct.
+        pass
         
     st.markdown("---")
 
