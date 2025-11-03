@@ -10,10 +10,11 @@ st.set_page_config(page_title="BarnaPoker", page_icon="🃏", layout="centered")
 # -------------------------------------------------------------------
 # ⚠️ ACTION REQUISE : Mettez à jour ces deux lignes ! ⚠️
 VOTRE_NOM_UTILISATEUR_GITHUB = "Ano-nyme-brut"
-VOTRE_NOM_DE_DEPOT_GITHUB = "BarnaPoker" 
+VOTRE_NOM_DEPO_GITHUB = "BarnaPoker" # C'EST VOTRE VARIABLE DE DÉPÔT ORIGINALE
 # -------------------------------------------------------------------
 
-BASE_IMAGE_URL = f"https://raw.githubusercontent.com/{VOTRE_NOM_UTILISATEUR_GITHUB}/{VOTRE_NOM_DE_DEPOT_GITHUB}/main/images/"
+# Nous utilisons la variable d'origine (VOTRE_NOM_DEPO_GITHUB) pour les calculs.
+BASE_IMAGE_URL = f"https://raw.githubusercontent.com/{VOTRE_NOM_UTILISATEUR_GITHUB}/{VOTRE_NOM_DEPO_GITHUB}/main/images/"
 
 # --- Configuration de la Simulation ---
 NB_ADVERSAIRES = 1
@@ -37,7 +38,7 @@ ORDRE_COULEUR = {'s': 4, 'h': 3, 'd': 2, 'c': 1}
 # --- Définitions de Cartes ---
 VALEURS = ['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A']
 COULEURS = ['h', 'd', 'c', 's']
-CARTES_ABREGEES = [v + c for v, c in product(VALEURS, COULEURS)]
+CARTES_ABREGEES = [v + c for v + c in product(VALEURS, COULEURS)]
 
 
 def get_carte_fr(abr):
@@ -172,7 +173,11 @@ def clear_hand():
     
 def clear_board():
     st.session_state.board_list = []
-
+    
+def reset_stats_action_safe():
+    st.session_state.wins = 0
+    st.session_state.losses = 0
+    st.rerun() 
 
 # --- Interface Streamlit ("BarnaPoker") ---
 
@@ -184,24 +189,18 @@ def lancer_app():
     if 'hand_list' not in st.session_state: st.session_state.hand_list = []
     if 'board_list' not in st.session_state: st.session_state.board_list = []
 
-    # --- FONCTIONS LOCALES AUX BOUTONS (POUR BYPASSER L'ERREUR D'API) ---
+
     def increment_wins(): 
         st.session_state.wins += 1
         st.rerun() 
     def increment_losses(): 
         st.session_state.losses += 1
         st.rerun() 
-        
-    # CORRECTION FINALE DU CALLBACK : Réinitialisation et Rechargement sécurisé
-    def reset_stats_action_safe():
-        st.session_state.wins = 0
-        st.session_state.losses = 0
-        st.rerun() 
-    # ------------------------------------
     
     # --- En-tête (Titre et Logo) ---
     col_logo, col_titre = st.columns([1, 3])
     with col_logo:
+        # CORRECTION DE LA FAUTE DE FRAPPE : UTILISE VOTRE_NOM_DEPO_GITHUB
         st.image(f"https://github.com/{VOTRE_NOM_UTILISATEUR_GITHUB}/{VOTRE_NOM_DEPO_GITHUB}/blob/main/barnaPoker.png?raw=true", width=150)
     with col_titre:
         st.title("BarnaPoker 🃏")
@@ -229,7 +228,7 @@ def lancer_app():
     stat_cols[1].metric("Mains Perdues", st.session_state.losses, "🔴")
     stat_cols[2].metric("Taux de Réussite", f"{taux_reussite:.1f}%", "🎯")
     
-    # Bouton de Réinitialisation des stats (Appel de la fonction stable)
+    # Bouton de Réinitialisation des stats 
     if st.button("Réinitialiser les Statistiques", on_click=reset_stats_action_safe, type="default"):
         pass
         
