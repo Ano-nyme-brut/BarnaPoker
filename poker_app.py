@@ -172,7 +172,7 @@ def clear_hand():
     
 def clear_board():
     st.session_state.board_list = []
-    
+
 
 # --- Interface Streamlit ("BarnaPoker") ---
 
@@ -184,16 +184,16 @@ def lancer_app():
     if 'hand_list' not in st.session_state: st.session_state.hand_list = []
     if 'board_list' not in st.session_state: st.session_state.board_list = []
 
-    # --- FONCTIONS LOCALES AUX BOUTONS ---
+    # --- FONCTIONS LOCALES AUX BOUTONS (POUR BYPASSER L'ERREUR D'API) ---
     def increment_wins(): 
         st.session_state.wins += 1
-        st.rerun() # Pour mettre à jour les métriques immédiatement
+        st.rerun() 
     def increment_losses(): 
         st.session_state.losses += 1
-        st.rerun() # Pour mettre à jour les métriques immédiatement
+        st.rerun() 
         
-    # CORRECTION FINALE DU CALLBACK : Utilise st.rerun pour forcer l'affichage de zéro
-    def reset_stats_action():
+    # CORRECTION FINALE DU CALLBACK : Réinitialisation et Rechargement sécurisé
+    def reset_stats_action_safe():
         st.session_state.wins = 0
         st.session_state.losses = 0
         st.rerun() 
@@ -202,7 +202,7 @@ def lancer_app():
     # --- En-tête (Titre et Logo) ---
     col_logo, col_titre = st.columns([1, 3])
     with col_logo:
-        st.image(f"https://github.com/{VOTRE_NOM_UTILISATEUR_GITHUB}/{VOTRE_NOM_DE_DEPOT_GITHUB}/blob/main/barnaPoker.png?raw=true", width=150)
+        st.image(f"https://github.com/{VOTRE_NOM_UTILISATEUR_GITHUB}/{VOTRE_NOM_DEPO_GITHUB}/blob/main/barnaPoker.png?raw=true", width=150)
     with col_titre:
         st.title("BarnaPoker 🃏")
         st.subheader("L'outil essentiel pour devenir un joueur gagnant.")
@@ -229,8 +229,8 @@ def lancer_app():
     stat_cols[1].metric("Mains Perdues", st.session_state.losses, "🔴")
     stat_cols[2].metric("Taux de Réussite", f"{taux_reussite:.1f}%", "🎯")
     
-    # Bouton de Réinitialisation des stats (Appelle le callback local)
-    if st.button("Réinitialiser les Statistiques", on_click=reset_stats_action, type="default"):
+    # Bouton de Réinitialisation des stats (Appel de la fonction stable)
+    if st.button("Réinitialiser les Statistiques", on_click=reset_stats_action_safe, type="default"):
         pass
         
     st.markdown("---")
