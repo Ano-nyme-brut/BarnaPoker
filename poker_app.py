@@ -10,17 +10,21 @@ st.set_page_config(page_title="BarnaPoker", page_icon="🃏", layout="centered")
 # -------------------------------------------------------------------
 # ⚠️ ACTION REQUISE : Mettez à jour ces deux lignes ! ⚠️
 VOTRE_NOM_UTILISATEUR_GITHUB = "Ano-nyme-brut"
-VOTRE_NOM_DEPO_GITHUB = "BarnaPoker" 
+VOTRE_NOM_DE_DEPOT_GITHUB = "BarnaPoker" 
 # -------------------------------------------------------------------
 
-BASE_IMAGE_URL = f"https://raw.githubusercontent.com/{VOTRE_NOM_UTILISATEUR_GITHUB}/{VOTRE_NOM_DEPO_GITHUB}/main/images/"
+# CORRECTION: Utiliser un chemin statique vers les ressources.
+# Supposons que le dossier 'images' est à la racine du dépôt.
+# Nous allons utiliser l'URL raw standard pour l'accès aux fichiers.
+BASE_IMAGE_URL = f"https://raw.githubusercontent.com/{VOTRE_NOM_UTILISATEUR_GITHUB}/{VOTRE_NOM_DE_DEPOT_GITHUB}/main/images/"
+
 
 # --- Configuration de la Simulation ---
 NB_ADVERSAIRES = 1
 NB_SIMULATIONS = 10000
 evaluator = Evaluator()
 
-# --- Dictionnaires de Traduction et Tri ---
+# --- Dictionnaires de Traduction et Tri (Inchangés) ---
 VALEURS_TRADUCTION = {
     '2': '2', '3': '3', '4': '4', '5': '5', '6': '6', '7': '7', '8': '8', '9': '9',
     'dix': 'T', 't': 'T', 'valet': 'J', 'v': 'J', 'dame': 'Q', 'd': 'Q', 'roi': 'K', 'r': 'K', 'as': 'A', 'a': 'A'
@@ -34,12 +38,10 @@ ORDRE_VALEUR = {'A': 14, 'K': 13, 'Q': 12, 'J': 11, 'T': 10, '9': 9, '8': 8, '7'
 ORDRE_COULEUR = {'s': 4, 'h': 3, 'd': 2, 'c': 1} 
 
 
-# --- Définitions de Cartes ---
+# --- Génération et Tri des Cartes (Inchangés) ---
 VALEURS = ['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A']
 COULEURS = ['h', 'd', 'c', 's']
-# CORRECTION SYNTAXIQUE APPLIQUÉE
-CARTES_ABREGEES = [v + c for v, c in product(VALEURS, COULEURS)] 
-
+CARTES_ABREGEES = [v + c for v, c in product(VALEURS, COULEURS)]
 
 def get_carte_fr(abr):
     valeur = abr[0]
@@ -61,11 +63,9 @@ CARTES_DISPONIBLES_FR = sorted([get_carte_fr(abr) for abr in CARTES_ABREGEES], k
 
 def get_button_value(card_fr):
     valeur_fr = card_fr.split(' ')[0].lower()
-    
     for key, short_code in VALEURS_TRADUCTION.items():
         if key == valeur_fr:
             return short_code
-            
     return valeur_fr.upper()
 
 # --- Fonctions de Logique (Conversion, Calcul, Affichage) ---
@@ -81,6 +81,7 @@ def parse_card_to_int(card_str_fr):
     return Card.new(valeur_abr + couleur_abr)
 
 def parse_card_to_filename(card_str_fr):
+    """Convertit 'As Coeur' en nom de fichier 'AS.png' (en MAJUSCULES pour la cohérence)."""
     parties = card_str_fr.lower().replace('-', ' ').split()
     if len(parties) < 2: return None
     valeur_input = parties[0]
@@ -88,6 +89,8 @@ def parse_card_to_filename(card_str_fr):
     valeur_abr = VALEURS_TRADUCTION.get(valeur_input) or VALEURS_TRADUCTION.get(valeur_input[0])
     couleur_abr = COULEURS_TRADUCTION.get(couleur_input)
     if not valeur_abr or not couleur_abr: return None
+    
+    # Assurez-vous que VOS FICHIERS sur GitHub sont EN MAJUSCULES (ex: AS.png, TD.png)
     return (valeur_abr + couleur_abr).upper() + ".png"
 
 @st.cache_data(show_spinner=False)
@@ -111,9 +114,7 @@ def get_equity(main_joueur, cartes_communes, nb_adversaires):
             for i in range(nb_adversaires)
         ]
         score_joueur = evaluator.evaluate(board_final, main_joueur)
-        
         scores_adversaires = [evaluator.evaluate(board_final, adv_main) for adv_main in adversaires_mains]
-        
         meilleur_score_adverse = min(scores_adversaires) if scores_adversaires else float('inf')
         if score_joueur < meilleur_score_adverse: victoires += 1
         elif score_joueur == meilleur_score_adverse: egalites += 1
@@ -142,6 +143,7 @@ def get_conseil_et_analyse(equite, taille_pot, mise_a_payer):
     return conseil, equite_perc, cote_pot_perc
 
 def display_selected_cards(card_list: List[str], title: str, cols: int):
+    """Affiche les images des cartes sélectionnées (ex: As Pique) et leur nom en dessous."""
     if not card_list: return
     
     st.markdown(f"#### {title}")
@@ -153,8 +155,11 @@ def display_selected_cards(card_list: List[str], title: str, cols: int):
                 img_file = parse_card_to_filename(card_fr)
                 
                 if img_file:
+                    # L'image doit pointer vers le bon fichier sur GitHub
                     st.image(BASE_IMAGE_URL + img_file, use_container_width=True) 
                 
+                # Afficher le nom de la carte en français en dessous de l'image
+                # Ce texte doit maintenant s'afficher sans problème
                 st.markdown(f"<p style='text-align: center; font-size: 14px; margin-top: -10px;'>{card_fr}</p>", unsafe_allow_html=True) 
 
 
@@ -173,13 +178,6 @@ def clear_hand():
     
 def clear_board():
     st.session_state.board_list = []
-    
-def reset_all_session_data():
-    st.session_state.wins = 0
-    st.session_state.losses = 0
-    st.session_state.hand_list = []
-    st.session_state.board_list = []
-    st.rerun() 
 
 # --- Interface Streamlit ("BarnaPoker") ---
 
@@ -192,48 +190,24 @@ def lancer_app():
     if 'board_list' not in st.session_state: st.session_state.board_list = []
 
 
-    def increment_wins(): 
-        st.session_state.wins += 1
-        st.rerun() 
-    def increment_losses(): 
-        st.session_state.losses += 1
-        st.rerun() 
+    def increment_wins(): st.session_state.wins += 1
+    def increment_losses(): st.session_state.losses += 1
     
     # --- En-tête (Titre et Logo) ---
     col_logo, col_titre = st.columns([1, 3])
     with col_logo:
-        # CORRECTION DU NOM DE LA VARIABLE POUR LE LOGO
-        st.image(f"https://github.com/{VOTRE_NOM_UTILISATEUR_GITHUB}/{VOTRE_NOM_DEPO_GITHUB}/blob/main/barnaPoker.png?raw=true", width=150)
+        st.image(f"https://github.com/{VOTRE_NOM_UTILISATEUR_GITHUB}/{VOTRE_NOM_DE_DEPOT_GITHUB}/blob/main/barnaPoker.png?raw=true", width=150)
     with col_titre:
         st.title("BarnaPoker 🃏")
-        st.subheader("L'outil essentiel pour devenir un joueur gagnant.")
+        st.subheader("Assistant d'Équité & Décision")
         
     st.markdown("---")
-
-    # --- Section de Bienvenue / Description ---
-    st.markdown("""
-        ### Bienvenue, Stratège.
-        **BarnaPoker** vous offre une **analyse instantanée** de votre position mathématique (Équité) pour vous aider à prendre la décision optimale.
-        Cliquez sur les cartes, lisez le conseil, et enregistrez vos résultats !
-    """)
-    st.markdown("---")
-
 
     # --- Affichage des Statistiques de Session ---
-    st.header("📊 Historique & Statistiques")
-    
-    total_mains = st.session_state.wins + st.session_state.losses
-    taux_reussite = st.session_state.wins / total_mains * 100 if total_mains > 0 else 0
-    
-    stat_cols = st.columns(3)
+    st.header("📊 Statistiques de Session")
+    stat_cols = st.columns(2)
     stat_cols[0].metric("Mains Gagnées", st.session_state.wins, "🟢")
     stat_cols[1].metric("Mains Perdues", st.session_state.losses, "🔴")
-    stat_cols[2].metric("Taux de Réussite", f"{taux_reussite:.1f}%", "🎯")
-    
-    # Bouton de Réinitialisation des stats (Appel de la fonction stable)
-    if st.button("Réinitialiser les Statistiques", on_click=reset_all_session_data, type="default"):
-        pass
-        
     st.markdown("---")
 
     # --- Configuration de la Grille ---
@@ -346,7 +320,7 @@ def lancer_app():
             cartes_communes_int = [parse_card_to_int(c) for c in st.session_state.board_list]
 
             # 3. Calcul
-            with st.spinner(f"Analyse des {NB_SIMULATIONS} scénarios en cours..."):
+            with st.spinner(f"Simulation de {NB_SIMULATIONS} mains en cours..."):
                 equite = get_equity(main_joueur_int, cartes_communes_int, NB_ADVERSAIRES)
             
             nom_combinaison = evaluator.class_to_string(evaluator.get_rank_class(evaluator.evaluate(cartes_communes_int, main_joueur_int)))
@@ -356,9 +330,9 @@ def lancer_app():
 
             st.header("Analyse de la Rentabilité")
             col_eq, col_cote = st.columns(2)
-            col_eq.metric(label="Équité (Votre % de victoire)", value=f"{equite_perc}%")
+            col_eq.metric(label="Équité (Vos chances de gagner)", value=f"{equite_perc}%")
             
-            if cote_pot_perc is not None: col_cote.metric(label="Cote du Pot (Rentabilité min.)", value=f"{cote_pot_perc}%")
+            if cote_pot_perc is not None: col_cote.metric(label="Cote du Pot (Rentabilité minimum)", value=f"{cote_pot_perc}%")
             else: col_cote.metric(label="Cote du Pot", value="N/A (Check)")
 
             st.markdown("---")
@@ -367,11 +341,11 @@ def lancer_app():
             
             # --- Boutons GAGNER / PERDU ---
             st.markdown("---")
-            st.subheader("Enregistrez le résultat de la main :")
+            st.subheader("Enregistrer le résultat de cette main :")
             stat_btn_cols = st.columns(2)
             
-            stat_btn_cols[0].button("🟢 J'AI GAGNÉ", on_click=increment_wins, use_container_width=True, type="primary")
-            stat_btn_cols[1].button("🔴 J'AI PERDU", on_click=increment_losses, use_container_width=True)
+            stat_btn_cols[0].button("🟢 GAGNER (Main suivante)", on_click=increment_wins, use_container_width=True)
+            stat_btn_cols[1].button("🔴 PERDU (Main suivante)", on_click=increment_losses, use_container_width=True)
 
         except Exception as e:
             st.error(f"❌ Une erreur s'est produite : {e}")
