@@ -34,7 +34,7 @@ ORDRE_VALEUR = {'A': 14, 'K': 13, 'Q': 12, 'J': 11, 'T': 10, '9': 9, '8': 8, '7'
 ORDRE_COULEUR = {'s': 4, 'h': 3, 'd': 2, 'c': 1} 
 
 
-# --- Définitions de Cartes (Remontées pour éviter les NameError) ---
+# --- Définitions de Cartes ---
 VALEURS = ['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A']
 COULEURS = ['h', 'd', 'c', 's']
 CARTES_ABREGEES = [v + c for v, c in product(VALEURS, COULEURS)]
@@ -141,7 +141,6 @@ def get_conseil_et_analyse(equite, taille_pot, mise_a_payer):
     return conseil, equite_perc, cote_pot_perc
 
 def display_selected_cards(card_list: List[str], title: str, cols: int):
-    """Affiche les images des cartes sélectionnées (ex: As Pique) et leur nom en dessous."""
     if not card_list: return
     
     st.markdown(f"#### {title}")
@@ -153,10 +152,8 @@ def display_selected_cards(card_list: List[str], title: str, cols: int):
                 img_file = parse_card_to_filename(card_fr)
                 
                 if img_file:
-                    # Correction du paramètre obsolète
                     st.image(BASE_IMAGE_URL + img_file, use_container_width=True) 
                 
-                # Affiche le nom de la carte en français
                 st.markdown(f"<p style='text-align: center; font-size: 14px; margin-top: -10px;'>{card_fr}</p>", unsafe_allow_html=True) 
 
 
@@ -176,10 +173,10 @@ def clear_hand():
 def clear_board():
     st.session_state.board_list = []
     
-def reset_stats():
+# CORRECTION: Fonction de réinitialisation sans st.rerun pour éviter l'APIException
+def reset_stats_action():
     st.session_state.wins = 0
     st.session_state.losses = 0
-    st.rerun() # Force la page à se recharger pour afficher le zéro immédiatement
 
 # --- Interface Streamlit ("BarnaPoker") ---
 
@@ -225,9 +222,9 @@ def lancer_app():
     stat_cols[1].metric("Mains Perdues", st.session_state.losses, "🔴")
     stat_cols[2].metric("Taux de Réussite", f"{taux_reussite:.1f}%", "🎯")
     
-    # Bouton de Réinitialisation des stats
-    if st.button("Réinitialiser les Statistiques", on_click=reset_stats, type="default"):
-        pass # L'action est gérée par la fonction on_click
+    # Bouton de Réinitialisation des stats (Utilise on_click pour l'action)
+    if st.button("Réinitialiser les Statistiques", on_click=reset_stats_action, type="default"):
+        pass # L'action est dans le callback
         
     st.markdown("---")
 
