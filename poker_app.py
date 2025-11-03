@@ -37,7 +37,7 @@ ORDRE_COULEUR = {'s': 4, 'h': 3, 'd': 2, 'c': 1}
 # --- Définitions de Cartes ---
 VALEURS = ['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A']
 COULEURS = ['h', 'd', 'c', 's']
-CARTES_ABREGEES = [v + c for v, c in product(VALEURS, COULEURS)]
+CARTES_ABREGEES = [v + c for v + c in product(VALEURS, COULEURS)]
 
 
 def get_carte_fr(abr):
@@ -173,13 +173,14 @@ def clear_hand():
 def clear_board():
     st.session_state.board_list = []
     
-# NOUVELLE FONCTION GLOBALE DE RESET STABLE
+# FONCTION SIMPLIFIÉE POUR ÉVITER L'ERREUR D'API
 def reset_all_session_data():
+    # Remet les compteurs à zéro et force la reconstruction de la page
     st.session_state.wins = 0
     st.session_state.losses = 0
     st.session_state.hand_list = []
     st.session_state.board_list = []
-    st.rerun() # Rechargement forcé après l'action
+    st.rerun() 
 
 # --- Interface Streamlit ("BarnaPoker") ---
 
@@ -229,7 +230,7 @@ def lancer_app():
     stat_cols[1].metric("Mains Perdues", st.session_state.losses, "🔴")
     stat_cols[2].metric("Taux de Réussite", f"{taux_reussite:.1f}%", "🎯")
     
-    # Bouton de Réinitialisation des stats (Appel de la fonction stable)
+    # Bouton de Réinitialisation des stats (UTILISE LA FONCTION GLOBALE SIMPLIFIÉE)
     if st.button("Réinitialiser les Statistiques", on_click=reset_all_session_data, type="default"):
         pass
         
