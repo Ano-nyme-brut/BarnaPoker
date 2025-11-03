@@ -37,8 +37,6 @@ ORDRE_COULEUR = {'s': 4, 'h': 3, 'd': 2, 'c': 1}
 # --- Définitions de Cartes ---
 VALEURS = ['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A']
 COULEURS = ['h', 'd', 'c', 's']
-
-# CORRECTION DE LA SYNTAXE (LIGNE 41)
 CARTES_ABREGEES = [v + c for v, c in product(VALEURS, COULEURS)]
 
 
@@ -175,10 +173,13 @@ def clear_hand():
 def clear_board():
     st.session_state.board_list = []
     
-def reset_stats_action_safe():
+# NOUVELLE FONCTION GLOBALE DE RESET STABLE
+def reset_all_session_data():
     st.session_state.wins = 0
     st.session_state.losses = 0
-    st.rerun() 
+    st.session_state.hand_list = []
+    st.session_state.board_list = []
+    st.rerun() # Rechargement forcé après l'action
 
 # --- Interface Streamlit ("BarnaPoker") ---
 
@@ -201,7 +202,6 @@ def lancer_app():
     # --- En-tête (Titre et Logo) ---
     col_logo, col_titre = st.columns([1, 3])
     with col_logo:
-        # CORRECTION DE LA FAUTE DE FRAPPE ICI
         st.image(f"https://github.com/{VOTRE_NOM_UTILISATEUR_GITHUB}/{VOTRE_NOM_DEPO_GITHUB}/blob/main/barnaPoker.png?raw=true", width=150)
     with col_titre:
         st.title("BarnaPoker 🃏")
@@ -230,7 +230,7 @@ def lancer_app():
     stat_cols[2].metric("Taux de Réussite", f"{taux_reussite:.1f}%", "🎯")
     
     # Bouton de Réinitialisation des stats (Appel de la fonction stable)
-    if st.button("Réinitialiser les Statistiques", on_click=reset_stats_action_safe, type="default"):
+    if st.button("Réinitialiser les Statistiques", on_click=reset_all_session_data, type="default"):
         pass
         
     st.markdown("---")
