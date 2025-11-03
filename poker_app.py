@@ -173,7 +173,7 @@ def clear_hand():
 def clear_board():
     st.session_state.board_list = []
     
-# CORRECTION: Fonction de réinitialisation sans st.rerun pour éviter l'APIException
+# CORRECTION DU CALLBACK : La fonction doit être simple pour ne pas violer l'API.
 def reset_stats_action():
     st.session_state.wins = 0
     st.session_state.losses = 0
@@ -189,8 +189,12 @@ def lancer_app():
     if 'board_list' not in st.session_state: st.session_state.board_list = []
 
 
-    def increment_wins(): st.session_state.wins += 1
-    def increment_losses(): st.session_state.losses += 1
+    def increment_wins(): 
+        st.session_state.wins += 1
+        st.rerun() # Force le rechargement pour montrer le score mis à jour
+    def increment_losses(): 
+        st.session_state.losses += 1
+        st.rerun() # Force le rechargement pour montrer le score mis à jour
     
     # --- En-tête (Titre et Logo) ---
     col_logo, col_titre = st.columns([1, 3])
@@ -224,7 +228,7 @@ def lancer_app():
     
     # Bouton de Réinitialisation des stats (Utilise on_click pour l'action)
     if st.button("Réinitialiser les Statistiques", on_click=reset_stats_action, type="default"):
-        pass # L'action est dans le callback
+        pass # L'action est gérée par le callback simple, qui est maintenant correct.
         
     st.markdown("---")
 
